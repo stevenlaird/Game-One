@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a1909e656617264b9baf58c97b75f77, type: 3}
+  m_Name: Tall_Grass
+  m_EditorClassIdentifier: 
+  itemName: Tall Grass
+  itemSprites:
+  - {fileID: 21300000, guid: 9be4980fbbfc3e94d96f7283ccdd515f, type: 3}
+  - {fileID: 21300000, guid: 28cd14e38a6f55e44a3fd6f311dae21f, type: 3}
+  - {fileID: 21300000, guid: b4d32faf3dbf6a141a674d63eefe914c, type: 3}
+  - {fileID: 21300000, guid: b37d821d3296e2548aeb5f0648ed4bfa, type: 3}
+  squareSprite: 0
+  stack: 1
+  maxStack: 99
+  tileLocation: 1
+  tileHealth: 100
+  isTree: 0
+  replaceable: 1
+  isUnbreakable: 0
+  dropTile: 1
+  alwaysDropTile: 0
+  dropTileChance: 5
+  droppedItem: {fileID: 11400000, guid: fef402f3b656d104baa0625516a871d9, type: 2}

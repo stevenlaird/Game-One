@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7093c5c870600d46a172c4842cd0675, type: 3}
+  m_Name: Wood Platform
+  m_EditorClassIdentifier: 
+  requiredItems:
+  - item: {fileID: 11400000, guid: 245f29f1e5f729340a874734f0ef0bc9, type: 2}
+    quantity: 1
+    startingDurability: 0
+    currentDurability: 999
+  craftedItem:
+    item: {fileID: 11400000, guid: dd1325ff605c8fd46a4e0d492904e1bf, type: 2}
+    quantity: 2
+    startingDurability: 0
+    currentDurability: 999
+  requireCraftingTable: 0
+  requireAnvil: 0
+  requireOven: 0
