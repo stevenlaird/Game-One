@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6015028857763305704
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6922875588003284298}
+  - component: {fileID: 659906963789045750}
+  m_Layer: 9
+  m_Name: SurfaceSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6922875588003284298
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6015028857763305704}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &659906963789045750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6015028857763305704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed5d1e597f5385f4a84c85d75ee4822e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dayNightCycle: {fileID: 0}
+  ogrePrefabs:
+  - {fileID: 4302174684881610451, guid: 8e5243844d192244a919e04a4b5d902e, type: 3}
+  - {fileID: 2893794491387388845, guid: c2d0b7982a650f9459334f5fe1675af3, type: 3}
+  - {fileID: 2560722379353145570, guid: 1b64681546e1ebf4db44e3f351ccba9c, type: 3}
+  walkingBarrelPrefab: {fileID: 4706029297832474898, guid: 24ac0b50652ad8444bd72e8ec717e277, type: 3}
+  ogres:
+    serializedVersion: 2
+    m_Bits: 32768
+  walkingBarrel:
+    serializedVersion: 2
+    m_Bits: 65536
+  checkForEnemyRadius: 30
+  spawnRateTimeMin: 10
+  spawnRateTimeMax: 40
+  distanceToPlayer: 0
+  canSpawnNewEnemy: 0
+  spawnCounter: 0
+  ogreCount: 0
+  wBCount: 0
