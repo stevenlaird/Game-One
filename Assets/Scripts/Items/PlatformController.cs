@@ -1,75 +1,103 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class PlatformController : MonoBehaviour
 {
+    // Variables to hold references to PlayerController and PlatformEffector2D components
     private PlayerController player;
     private PlatformEffector2D platformEffector2D;
+    
+    // Variables to adjust settings of this platform
     public float waitTime;
+    public float distanceToPlayer;
+    
+    // Variables to check the state of the player's input and movement
     public bool playerMovingDown;
     public float playerVerticalInput;
     public float playerJumpInput;
-    public float distanceToPlayer;
 
     ///////////////////
 
     void Start()
     {
+        // Find the PlayerController component in the scene
         player = PlayerController.FindObjectOfType<PlayerController>();
+        
+        // Set the tag of this game object to "Ground"
         this.gameObject.tag = "Ground";
+        
+        // Add a BoxCollider2D component to this game object and set its size and offset
         this.gameObject.AddComponent<BoxCollider2D>().size = new Vector2(1.0f, 0.3f);
         this.gameObject.GetComponent<BoxCollider2D>().offset = new Vector2(0.0f, 0.35f);
         this.gameObject.GetComponent<BoxCollider2D>().usedByEffector = true;
+        
+        // Add a PlatformEffector2D component to this game object and set its surfaceArc
         platformEffector2D = this.gameObject.AddComponent<PlatformEffector2D>();
         platformEffector2D.surfaceArc = 90f;
+        
+        // Set the initial value of waitTime and playerMovingDown
         waitTime = 0.1f;
         playerMovingDown = false;
     }
 
     void Update()
     {
-        playerVerticalInput = player.vertical;  // Was used to display Player's Input in inspector when fine tuning this script
-        playerJumpInput = player.jump;          // Was used to display Player's Input in inspector when fine tuning this script
-        
-        // Calculate distanceToPlayer using the Player's position. Added Vector3.Down to get a distance from the Player's Feet
+        // Get the player's input for debugging purposes
+        playerVerticalInput = player.vertical;
+        playerJumpInput = player.jump;
+
+        // Calculate the distance between this platform and the player's feet
         distanceToPlayer = Vector2.Distance(this.transform.position, (player.transform.position + Vector3.down));
 
-        if (playerMovingDown && waitTime > 0f)  // IF the Player presses a key or button to MOVE DOWN AND waitTime hasn't counted down to 0
+        // IF the player is currently moving down and the wait time hasn't elapsed yet
+        if (playerMovingDown && waitTime > 0f)
         {
-            waitTime -= Time.fixedDeltaTime;        // Countdown waitTime
+            // Countdown the wait time
+            waitTime -= Time.fixedDeltaTime;
         }
-        else                                    // Player isn't pressing a key or button to MOVE DOWN OR waitTime has counted down to 0
+        // ELSE The player is no longer moving down or the wait time has elapsed
+        else
         {
-            playerMovingDown = false;               // Player is not falling through this Platform
-            waitTime = 0.1f;                        // Reset the waitTime counter so Player can fall through it again
+            // Set playerMovingDown to FALSE
+            playerMovingDown = false;
+            // Reset the wait time counter so the player can fall through the platform again
+            waitTime = 0.1f;
         }
 
-        if (player.jump < -0.1f || player.vertical < -0.1f) // IF Player presses a key or button to MOVE DOWN
+        // IF the player is trying to move down
+        if (player.jump < -0.1f || player.vertical < -0.1f)
         {
-            if (waitTime > 0f && distanceToPlayer < 0.8f)       // IF waitTime counter is greater than 0 AND this Platform is close enough to the Player's Feet
+            // IF the wait time hasn't elasped yet AND the Player is close enough to the platform
+            if (waitTime > 0f && distanceToPlayer < 0.8f)
             {
-                platformEffector2D.rotationalOffset = 180f;         // PlatformEffector Component's Rotational Offset is flipped allowing Player to fall through
-                playerMovingDown = true;                            // Player is falling through this Platform
+                // Flip the PlatformEffector Component's Rotational Offset so the player falls through the platform
+                platformEffector2D.rotationalOffset = 180f;
+                // Set playerMovingDown to TRUE
+                playerMovingDown = true;
             }
 
-            if (waitTime <= 0)                                  // IF waitTime counter hits 0, or lower for buffer
+            // If the wait time has elapsed
+            if (waitTime <= 0)
             {
-                playerMovingDown = false;                           // Player is no longer falling through this Platform
-                platformEffector2D.rotationalOffset = 0f;           // PlatformEffector Component's Rotational Offset is reset allowing Player to recognize it as Ground again
+                // Set playerMovingDown to FALSE
+                playerMovingDown = false;
+                // Reset the PlatformEffector Component's Rotational Offset so the player recognizes the platform as ground again
+                platformEffector2D.rotationalOffset = 0f;
             }
+        }
 
-        }
-        if (player.jump > 0.1f || player.vertical > 0.1f)   // IF Player presses a key or button to JUMP
+        // If the player is trying to jump
+        if (player.jump > 0.1f || player.vertical > 0.1f)
         {
-            platformEffector2D.rotationalOffset = 0f;           // PlatformEffector Component's Rotational Offset is reset allowing Player to recognize it as Ground
+            // Reset the PlatformEffector Component's Rotational Offset so the player recognizes the platform as ground again
+            platformEffector2D.rotationalOffset = 0f;
         }
-        if (player.jump == 0f && player.vertical == 0f)     // If Player is not pressing a key/button to JUMP or MOVE DOWN
+        // If the player is not trying to jump or move down
+        if (player.jump == 0f && player.vertical == 0f)
         {
-            if (playerMovingDown == false)                      // IF Player is no longer falling through this Platform
+            if (playerMovingDown == false)
             {
-                platformEffector2D.rotationalOffset = 0f;           // PlatformEffector Component's Rotational Offset is reset allowing Player to recognize it as Ground
+                // Reset the PlatformEffector Component's Rotational Offset so the player recognizes the platform as ground again
+                platformEffector2D.rotationalOffset = 0f;
             }
         }
     }

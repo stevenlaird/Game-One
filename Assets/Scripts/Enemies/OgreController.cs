@@ -1,96 +1,98 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class OgreController : MonoBehaviour
 {
     [Header("Status Display")]
-    public int currentHealth;
-    public FacingDirection facingDirection;
-    public enum FacingDirection
+    // Public variables to display information about the Ogre's status in the Unity Inspector
+    public int currentHealth;                   // Current health of the Ogre
+    public FacingDirection facingDirection;     // Enum to keep track of the Ogre's facing direction
+    public enum FacingDirection                 // Enum definition for the Ogre's facing direction
     {
         Left, Right
     }
-    public bool onGround;
-    public float moveSpeed;
-    public int currentPassiveState;
-    public float changeStateCounter;
-    public bool agroToPlayerState;
-    public bool playerWithinAttackRange;
-    public float attackCounter;
-    public bool inKnockBackState;
-    public float knockbackCounter;
-    public bool isDead;
-    public float destroyCounter;
+    public bool onGround;                       // Boolean to check if the Ogre is on the ground
+    public float moveSpeed;                     // Speed at which the Ogre moves
+    public int currentPassiveState;             // The current passive state of the Ogre
+    public float changeStateCounter;            // Time counter to change the passive state
+    public bool agroToPlayerState;              // Boolean to check if the Ogre is in an aggressive state towards the player
+    public bool playerWithinAttackRange;        // Boolean to check if the player is within the Ogre's attack range
+    public float attackCounter;                 // Time counter to determine when the Ogre can attack
+    public bool inKnockBackState;               // Boolean to check if the Ogre is in knockback state
+    public float knockbackCounter;              // Time counter for the knockback state
+    public bool isDead;                         // Boolean to check if the Ogre is dead
+    public float destroyCounter;                // Time counter to destroy the Ogre's game object
 
 
     [Header("Enemy Customization")]
-    public int maxHealth = 100;
-    public int damageDealt = 10;
-    public float walkSpeed = 2;
-    public float agroSpeed = 3;
-    public float jumpForce = 4;
-    public float stateTimeMin = 1f;
-    public float stateTimeMax = 5f;
-    public float agroStateRange = 10f;
-    public float agroAttackRange = 2f;
-    public float attackDelay = 1f;
-    public float knockbackStateDelay = 0.4f;
+    // Public variables to customize the Ogre's attributes in the Unity Inspector
+    public int maxHealth = 100;                 // Maximum health of the Ogre
+    public int damageDealt = 10;                // Damage dealt by the Ogre's attack
+    public float walkSpeed = 2;                 // Walking speed of the Ogre
+    public float agroSpeed = 3;                 // Speed of the Ogre in aggressive state
+    public float jumpForce = 4;                 // Force of the Ogre's jump
+    public float stateTimeMin = 1f;             // Minimum time for the passive state
+    public float stateTimeMax = 5f;             // Maximum time for the passive state
+    public float agroStateRange = 10f;          // Range for the Ogre to enter aggressive state towards player
+    public float agroAttackRange = 2f;          // Range for the Ogre to attack the player
+    public float attackDelay = 1f;              // Delay between attacks
+    public float knockbackStateDelay = 0.4f;    // Delay for the knockback state
 
-    public InvSlotClass[] droppedItems;
-    
-    [HideInInspector] public Vector2 movement;
-    
+    public InvSlotClass[] droppedItems;         // Array of items that the Ogre will drop when killed
+
+    [HideInInspector] public Vector2 movement;  // Movement vector of the Ogre
+
 
     [Header("Parents and Prefabs")]
-    private PlayerController player;
-    private TerrainGeneration terrain;
-    private GameObject tileDropCircle;
+    // References to other game objects in the scene
+    private PlayerController player;            // Reference to the PlayerController
+    private TerrainGeneration terrain;          // Reference to the TerrainGeneration
+    private GameObject tileDropCircle;          // Reference to the tile drop circle prefab
 
-    private Animator animator;
-    public Rigidbody2D rb2d;
-    public LayerMask autoJumpOnLayers;
+    private Animator animator;                  // Reference to the animator component of the Ogre
+    public Rigidbody2D rb2d;                    // Reference to the Rigidbody2D component of the Ogre
+    public LayerMask autoJumpOnLayers;          // Layer mask to automatically jump over obstacles
 
-    public Transform hitDetection;
-    public float hitDetectionSize;
-    public LayerMask hitPlayer;
+    public Transform hitDetection;              // Transform of the Ogre's hit detection object
+    public float hitDetectionSize;              // Size of the Ogre's hit detection object
+    public LayerMask hitPlayer;                 // Layer mask to detect the Player for attacking
 
 
     [Header("Audio Clips")]
-    public AudioSource sound_Idle1;
-    public AudioSource sound_Idle2;
-    public AudioSource sound_TakeDamage;
-    public AudioSource sound_TakeDamageOgre;
-    public AudioSource sound_DealDamage;
-    public AudioSource sound_Dead;
+    // Public audio sources for the Ogre's audio clips
+    public AudioSource sound_Idle1;             // Idle sound 1
+    public AudioSource sound_Idle2;             // Idle sound 2
+    public AudioSource sound_TakeDamage;        // Take damage default splat
+    public AudioSource sound_TakeDamageOgre;    // Take damage ogre cry
+    public AudioSource sound_DealDamage;        // Deal damage sound
+    public AudioSource sound_Dead;              // Death sound
 
     ///////////////////
 
     void Start()
     {
+        // Find Player and Terrain in the scene and load TileDropCircle prefab
         player = PlayerController.FindObjectOfType<PlayerController>();
         terrain = TerrainGeneration.FindObjectOfType<TerrainGeneration>();
         tileDropCircle = Resources.Load<GameObject>("TileDropCircle");
 
+        // Set Ogre's animator and rigidbody components
         animator = this.GetComponent<Animator>();
         rb2d = this.transform.parent.GetComponent<Rigidbody2D>();
 
+        // Set starting values for the Ogre's variables
         currentHealth = maxHealth;
         facingDirection = FacingDirection.Right;
         agroToPlayerState = false;
         isDead = false;
         destroyCounter = 0;
-
-        float chunkCoord = (Mathf.Round(this.transform.parent.transform.position.x / terrain.chunkSize) * terrain.chunkSize);
-        chunkCoord /= terrain.chunkSize;
-        //this.transform.parent.SetParent(terrain.worldChunks[(int)chunkCoord].transform.GetChild(4).transform);
     }
 
     void Update()
     {
+        // Calculate the distance between the Ogre and the Player
         float distanceToPlayer = Vector2.Distance(transform.position, player.transform.position);
 
+        // Check if the Player is within aggro range or attack range and set the corresponding variables
         if (distanceToPlayer <= agroStateRange && distanceToPlayer >= agroAttackRange)
         { agroToPlayerState = true; playerWithinAttackRange = false; }
         else if (distanceToPlayer > agroStateRange)
@@ -98,13 +100,14 @@ public class OgreController : MonoBehaviour
         else if (distanceToPlayer < agroAttackRange)
         { agroToPlayerState = true; playerWithinAttackRange = true; }
 
+        // Set animator parameters and call various counter methods
         animator.SetFloat("Horizontal Movement", movement.x);
         animator.SetBool("Following Player", agroToPlayerState);
-
         ChangeStateCounter();
         KnockbackCounter();
         DestroyCounter();
 
+        // Debug code to draw various rays for testing
         //Debug.DrawRay(this.transform.position - (Vector3.up * 0.5f), Vector2.right * transform.localScale.x, Color.white, 1f);
         //Debug.DrawRay(this.transform.position + (Vector3.up * 0.5f), Vector2.right * transform.localScale.x, Color.white, 2f);
         //Debug.DrawRay(this.transform.position + (Vector3.up * 1.5f), Vector2.right * transform.localScale.x, Color.white, 2f);
@@ -113,21 +116,27 @@ public class OgreController : MonoBehaviour
         //Debug.DrawRay(this.transform.position + (Vector3.right * 2.1f * transform.localScale.x) - Vector3.up, -Vector2.up, Color.white, 2f);
     }
 
+    // This method is called every fixed frame and updates the Ogre's movement and actions
     private void FixedUpdate()
     {
+        // IF the Ogre is dead
         if (isDead == true)
         {
+            // Freeze the Ogre's rigidbody and disable its collider
             rb2d.constraints = RigidbodyConstraints2D.FreezeAll;
             this.GetComponent<CapsuleCollider2D>().enabled = false;
             return;
         }
 
+        // IF Ogre is not in knockback state
         if (inKnockBackState == false)
         {
+            // IF Ogre is not aggroed to the player and the player is not within attack range
             if (agroToPlayerState == false && playerWithinAttackRange == false)
             {
                 moveSpeed = walkSpeed;
 
+                // Depending on current passive state, call WalkingState(), IdleState(), or ChangeDirection()
                 if (currentPassiveState == 0)
                 {
                     WalkingState();
@@ -141,27 +150,33 @@ public class OgreController : MonoBehaviour
                     ChangeDirection();
                 }
 
+                // IF the Ogre is facing right, set its sprite facing right
                 if (facingDirection == FacingDirection.Right)
                 {
-                    transform.localScale = new Vector3(1, 1, 1); //change sprite right
+                    transform.localScale = new Vector3(1, 1, 1);
                 }
+                // IF the Ogre is facing left, set its sprite facing left
                 else if (facingDirection == FacingDirection.Left)
                 {
-                    transform.localScale = new Vector3(-1, 1, 1); //change sprite left
+                    transform.localScale = new Vector3(-1, 1, 1);
                 }
 
-                if (GroundRaycast() && !FrontRaycast() && !FrontRaycast2() && !UpRaycast() && movement.x != 0) // autojump
+                // IF the Ogre is on the ground and there is no obstacle in front of it, and it is not currently jumping, make it jump
+                if (GroundRaycast() && !FrontRaycast() && !FrontRaycast2() && !UpRaycast() && movement.x != 0) // AutoJump
                 {
                     if (onGround)
                     {
-                        movement.y = jumpForce; //jump
+                        movement.y = jumpForce;
                     }
                 }
+
+                // IF the Ogre is blocked by an obstacle in front or above, make it change direction
                 if ((GroundRaycast() && FrontRaycast()) || FrontRaycast2() || (!DownRaycast() && !DownRaycast2()))
                 {
                     ChangeDirection();
                 }
 
+                // UNUSED: Check the distance to the player's spawn position and make the Ogre change direction if the player is too close
                 /*float distanceToPlayerSpawn = Vector2.Distance(transform.position, player.spawnPosition);
                 if (distanceToPlayerSpawn < 10)
                 {
@@ -169,32 +184,37 @@ public class OgreController : MonoBehaviour
                 }*/
             }
 
+            // IF the Ogre is aggroed to the player but not within attack range
             else if (agroToPlayerState == true && playerWithinAttackRange == false)
             {
                 moveSpeed = agroSpeed;
 
+                // IF the Player is to the right of the Ogre, move the Ogre right and face it right
                 if (transform.position.x + 1f < player.transform.position.x)
                 {
                     facingDirection = FacingDirection.Right;
                     movement = new Vector2(moveSpeed, rb2d.velocity.y);
-                    transform.localScale = new Vector3(1, 1, 1); //change sprite right
+                    transform.localScale = new Vector3(1, 1, 1);
                 }
+                // ELSE IF the Player is to the left of the Ogre, move the Ogre left and face it left
                 else if (transform.position.x - 1f > player.transform.position.x)
                 {
                     facingDirection = FacingDirection.Left;
                     movement = new Vector2(-moveSpeed, rb2d.velocity.y);
-                    transform.localScale = new Vector3(-1, 1, 1); //change sprite left
+                    transform.localScale = new Vector3(-1, 1, 1);
                 }
+                // ELSE no movement
                 else
                 {
                     movement = new Vector2(0, rb2d.velocity.y);
                 }
 
-                if (GroundRaycast() && !FrontRaycast() && !FrontRaycast2() && !UpRaycast()) // autojump
+                // IF these ray cast are detected, autojump
+                if (GroundRaycast() && !FrontRaycast() && !FrontRaycast2() && !UpRaycast())
                 {
                     if (onGround)
                     {
-                        movement.y = jumpForce; //jump
+                        movement.y = jumpForce;
                     }
                 }
                 if (GroundRaycast() && FrontRaycast())
@@ -203,25 +223,31 @@ public class OgreController : MonoBehaviour
 
                     if (onGround)
                     {
-                        movement.y = jumpForce; //jump
+                        movement.y = jumpForce;
                     }
                 }
             }
 
+            // IF the Ogre is aggroed to the player and within attack range
             else if (playerWithinAttackRange == true)
             {
+                // Stop Ogre's velocity stopping it near the player to attack
                 movement = new Vector2(rb2d.velocity.x, rb2d.velocity.y);
+                // Deal damage to the player
                 DealDamage();
             }
 
+            // Set rigidbody velocity using movement variable assigned in previous IF statements
             rb2d.velocity = movement;
         }
     }
 
+    // Handles the countdown for the Ogre's passive state change
     public void ChangeStateCounter()
     {
         if (changeStateCounter <= 0)
         {
+            // Change the current passive state and play the corresponding sound effect
             currentPassiveState = ChangeState(3);
             if (currentPassiveState == 0)
                 sound_Idle1.Play();
@@ -231,16 +257,20 @@ public class OgreController : MonoBehaviour
         }
         else
         {
+            // Countdown
             changeStateCounter -= Time.fixedDeltaTime;
         }
     }
 
+    // Change the Ogre's passive state at random intervals
     public int ChangeState(int count)
     {
+        // Randomly select a new state for the Ogre to enter
         int selectedState = UnityEngine.Random.Range(0, count);
         return selectedState;
     }
 
+    // Make the Ogre walk in its current facing direction
     public void WalkingState()
     {
         if (facingDirection == FacingDirection.Right)
@@ -253,11 +283,13 @@ public class OgreController : MonoBehaviour
         }
     }
 
+    // Make the Ogre idle (stop moving)
     public void IdleState()
     {
         movement = new Vector2(0, rb2d.velocity.y);
     }
 
+    // Change the Ogre's facing direction
     public void ChangeDirection()
     {
         if (facingDirection == FacingDirection.Right)
@@ -267,14 +299,17 @@ public class OgreController : MonoBehaviour
         currentPassiveState = ChangeState(2);
     }
 
+    // Deal damage to the player within attack range
     public void DealDamage()
     {
         if (AttackDelay())
         {
+            // Play attack animation and sound
             animator.SetTrigger("Attack");
             sound_DealDamage.Play();
+            // Detect Player
             Collider2D[] detectPlayer = Physics2D.OverlapCircleAll(hitDetection.position, hitDetectionSize, hitPlayer);
-            
+            // Apply damage to Player and reset the counter for delay between attacks
             for (int i = 0; i < detectPlayer.Length; i++)
             {
                 if (detectPlayer[i].tag == "Player")
@@ -287,29 +322,36 @@ public class OgreController : MonoBehaviour
         }
     }
 
+    // Draw a gizmo sphere in the Editor around the Ogre's hit detection area for testing
     public void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(hitDetection.position, hitDetectionSize);
     }
 
+    // Handle damage taken by the Ogre and apply knockback
     public void TakeDamage(int damageTaken, Vector3 hitFromPosition)
     {
+        // Play default hit splat sound
         sound_TakeDamage.Play();
         
+        // IF the Ogre is not dead
         if (isDead == false)
         {
+            // Subtract the damage taken from current health, play animation and sound
             currentHealth -= damageTaken;
             animator.SetTrigger("Take Damage");
             sound_TakeDamageOgre.Play();
 
+            // Apply knockback and reset knockback counter
             Vector2 knockbackDirection = (transform.position - hitFromPosition).normalized;
             Vector2 knockbackX = new Vector2(knockbackDirection.x, 0f);
 
             knockbackCounter = knockbackStateDelay;
-            //rb2d.AddForce(knockbackDirection * 10, ForceMode2D.Impulse);
+                //rb2d.AddForce(knockbackDirection * 10, ForceMode2D.Impulse);
             rb2d.AddForce(knockbackX * 10, ForceMode2D.Impulse);
 
+            // IF player is holding an item, and its not made of wood, subtract it's durability by 1
             if (player.inventoryManager.inventoryItems[player.inventoryManager.selectedSlot].GetItem() != null)
             {
                 if (!player.inventoryManager.inventoryItems[player.inventoryManager.selectedSlot].GetItem().itemName.Contains("Wood"))
@@ -318,6 +360,7 @@ public class OgreController : MonoBehaviour
                 }
             }
 
+            // IF current health hits 0, play animation and sound, freeze rigidbody, and set isDead to TRUE
             if (currentHealth <= 0)
             {
                 Debug.Log(this.gameObject.name + " is Dead");
@@ -330,6 +373,7 @@ public class OgreController : MonoBehaviour
         }
     }
 
+    // Apply a delay between the Ogre's attacks
     private bool AttackDelay()
     {
         if (attackCounter <= 0)
@@ -343,6 +387,7 @@ public class OgreController : MonoBehaviour
         }
     }
 
+    // Apply a delay to the Ogre's knockback state
     private void KnockbackCounter()
     {
         if (knockbackCounter <= 0)
@@ -356,6 +401,7 @@ public class OgreController : MonoBehaviour
         }
     }
 
+    // Destroy the Ogre after a set amount of time has passed since its death
     public void DestroyCounter()
     {
         if (isDead == true)
@@ -371,6 +417,7 @@ public class OgreController : MonoBehaviour
         }
     }
 
+    // Instantiate dropped items when the Ogre is destroyed
     public void CreateTileDrops()
     {
         float chunkCoord = (Mathf.Round(this.transform.parent.transform.position.x / terrain.chunkSize) * terrain.chunkSize);
@@ -389,6 +436,7 @@ public class OgreController : MonoBehaviour
         }
     }
 
+    // Raycast checks to determine if there is a ground tile, used to autojump and change directions at walls and gaps
     public bool GroundRaycast()
     {
         RaycastHit2D hit = Physics2D.Raycast(this.transform.position - (Vector3.up * 0.5f), Vector2.right * transform.localScale.x, 1.5f, autoJumpOnLayers);
@@ -420,16 +468,15 @@ public class OgreController : MonoBehaviour
         return hit;
     }
 
+    // Collision triggers checks to determine if the Ogre is on ground
     private void OnTriggerStay2D(Collider2D collider)
     {
         if (collider.CompareTag("Ground"))
         { onGround = true; }
     }
-
     private void OnTriggerExit2D(Collider2D collider)
     {
         if (collider.CompareTag("Ground"))
         { onGround = false; }
     }
-
 }
