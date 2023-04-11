@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     [Header("Prefabs & Parents")]
+    // References to the objects and parents required for the inventory system
     [SerializeField] public GameObject player;
     [SerializeField] public TerrainGeneration terrain;
 
@@ -25,14 +26,16 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private GameObject craftingResult_SlotPrefab;
     [SerializeField] private GameObject craftingRequired_SlotPrefab;
 
+    [Header("Inventory")]
+    // References to the items in the inventory
     [SerializeField] public InvSlotClass[] startingItems;
     public InvSlotClass[] inventoryItems;
     private GameObject[] inventorySlots;
     public InvSlotClass[] equippedArmor;
     private GameObject[] armorSlots;
 
-
     [Header("Inventory Controls")]
+    // References to the inventory control variables
     public bool inventoryOpen = false;
     public bool usingInventory = false;
 
@@ -45,8 +48,8 @@ public class InventoryManager : MonoBehaviour
     private InvSlotClass grabItemOrigin;
     private InvSlotClass changeSlotTemp;
 
-
     [Header("Crafting")]
+    // References to the crafting variables
     private Vector2 craftingResetPositionResult;
     private Vector2 craftingResetPositionRequiredOne;
     private Vector2 craftingResetPositionRequiredTwo;
@@ -74,8 +77,10 @@ public class InventoryManager : MonoBehaviour
 
     ///////////////////
 
+    // This method is called when the script is enabled, and initializes the inventory and crafting systems
     private void Start()
     {
+        // Initializes the inventory slots and items
         inventorySlots = new GameObject[inventoryHotbarParent.transform.childCount + inventoryBackpackParent.transform.childCount];
         inventoryItems = new InvSlotClass[inventorySlots.Length];
         for (int i = 0; i < inventoryHotbarParent.transform.childCount + inventoryBackpackParent.transform.childCount; i++)
@@ -90,6 +95,7 @@ public class InventoryManager : MonoBehaviour
             inventoryItems[i] = new InvSlotClass();
         }
 
+        // Initializes the equipped armor slots and items
         armorSlots = new GameObject[equippedArmorParent.transform.childCount];
         equippedArmor = new InvSlotClass[armorSlots.Length];
         for (int i = 0; i < equippedArmorParent.transform.childCount; i++)
@@ -101,6 +107,7 @@ public class InventoryManager : MonoBehaviour
             equippedArmor[i] = new InvSlotClass();
         }
 
+        // Initialize the crafting system variables
         craftingResetPositionResult = craftingResultSlotsParent.gameObject.transform.localPosition;
         craftingResetPositionRequiredOne = craftingRequiredItemOneSlotsParent.gameObject.transform.localPosition;
         craftingResetPositionRequiredTwo = craftingRequiredItemTwoSlotsParent.gameObject.transform.localPosition;
@@ -118,6 +125,7 @@ public class InventoryManager : MonoBehaviour
         selectedCraftClass = new CraftingRecipeClass[craftingRecipeClasses.Count];
         selectedCraftClass_Off = new CraftingRecipeClass[craftingRecipeClasses.Count];
 
+        // Creates the crafting result and required item slots for each crafting recipe
         for (int i = 0; i < craftingRecipeClasses.Count; i++)
         {
             craftingResultSlots[i] = Instantiate(craftingResult_SlotPrefab, craftingResultSlotsParent.transform);
@@ -139,11 +147,13 @@ public class InventoryManager : MonoBehaviour
             craftingRequiredItemTwoSlots[i].transform.localScale = Vector3.one;
         }
 
+        // Add the starting items to the inventory
         for (int i = 0; i < startingItems.Length; i++)
         {
             AddToInventory(startingItems[i].GetItem(), startingItems[i].GetQuantity(), startingItems[i].GetStartingDurability(), startingItems[i].GetCurrentDurability());
         }
 
+        // Refresh the UI to display the correct inventory and crafting systems
         RefreshUI();
     }
 

@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -9,6 +8,8 @@ public class TorchLightGlow : MonoBehaviour
     public float radiusCounter;
     private bool intensityMax;
     private bool radiusMax;
+
+    ///////////////////
 
     void Start()
     {

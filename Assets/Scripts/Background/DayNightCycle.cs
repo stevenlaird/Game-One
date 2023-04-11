@@ -1,50 +1,46 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking.Match;
-using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public class DayNightCycle : MonoBehaviour
 {
-    public TextMeshProUGUI timeDisplay;
-    public TextMeshProUGUI dayDisplay;
-    public TextMeshProUGUI daysSurvivedDisplay;
-    public Material stars;
-    public Light2D sunlight;
-    public GameObject sunMoon;
-    private float sunMoonRotation;
+    public TextMeshProUGUI timeDisplay;             // Text object displaying in-game time
+    public TextMeshProUGUI dayDisplay;              // Text object displaying current in-game day
+    public TextMeshProUGUI daysSurvivedDisplay;     // Text object displaying the number of days survived
+    public Material stars;                          // Material used for the stars
+    public Light2D sunlight;                        // 2D light representing the sun
+    public GameObject sunMoon;                      // GameObject representing the sun and moon
+    private float sunMoonRotation;                  // Current rotation angle for the sun/moon object
 
-    public int sunRise = 5;
-    public int sunSet = 16;
+    public int sunRise = 5;                         // In-game hour when the sun rises
+    public int sunSet = 16;                         // In-game hour when the sun sets
+    public int starsAppear = 18;                    // In-game hour when the stars appear
+    public int starsDisappear = 3;                  // In-game hour when the stars disappear
 
-    public int starsAppear = 18;
-    public int starsDisappear = 3;
-
-    public enum GameSpeed
+    public enum GameSpeed                           // Enumeration for different game speeds
     {
         Normal,
         Fast,
         SuperFast
     };
-    public GameSpeed gameSpeed;
+    public GameSpeed gameSpeed;                     // Current game speed
 
-    private float tick;
-    private float rotation;
+    private float tick;                             // Tick rate for the game speed
+    private float rotation;                         // Rotation angle for the sun/moon object
 
-    public float realSeconds = 60;
-    public float seconds = 0;
-    public int minutes = 0;
-    public int hours = 10;
-    public int days = 0;
-    public int daysSurvived;
-
-    public bool dayTime;
+    public float realSeconds = 60;                  // Real-time seconds per in-game second
+    public float seconds = 0;                       // In-game seconds
+    public int minutes = 0;                         // In-game minutes
+    public int hours = 10;                          // In-game hours
+    public int days = 0;                            // In-game days
+    public int daysSurvived;                        // Number of in-game days survived
+    public bool dayTime;                            // Flag for whether it is currently daytime
 
     ///////////////////
 
     void Start()
     {
+        // Set the tick and rotation values based on the game speed
         if (gameSpeed == GameSpeed.Normal)
         {
             tick = 60;
@@ -62,43 +58,56 @@ public class DayNightCycle : MonoBehaviour
         }
         realSeconds = 60;
 
+        // Calculate the starting rotation angle based on the current time
         float secondsPerDay = 60 * 60 * 24;
         float secondsPerInGameDay = (Time.fixedDeltaTime * tick) / secondsPerDay;
         float startingSeconds = (seconds + minutes * 60 + hours * 60 * 60) / (Time.fixedDeltaTime * tick);
         float startingRotation = (secondsPerInGameDay * 360) * startingSeconds;
-        sunMoon.transform.Rotate(0, 0, startingRotation + 180); //add 180 so sun can be set to noon in scene view
+        sunMoon.transform.Rotate(0, 0, startingRotation + 180);// Add 180 so sun can be set to noon in scene view
 
+        // Get the Light2D component attached to this GameObject
         sunlight = gameObject.GetComponent<Light2D>();
 
+        // Set the stars to be transparent at the start
         stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, 0);
+
+        // Initialize the daysSurvived variable
         daysSurvived = 0;
     }
 
     void FixedUpdate()
     {
-        CalcTime();
-        DisplayTime();
-        DaysSurvived();
-        RotateSunMoon();
-        ControlSunlightIntesity();
-        ControlStars();
+        CalcTime();                             // Update in-game time
+        DisplayTime();                          // Display time and day number
+        DaysSurvived();                         // Update days survived and adjust display transparency
+        RotateSunMoon();                        // Rotate the sun/moon object based on time of day
+        ControlSunlightIntesity();              // Adjust the intensity of the sun based on time of day
+        ControlStars();                         // Adjust the opacity of stars based on time of day
     }
 
     public void CalcTime()
     {
+        // Increase the real time counter by fixed delta time
         realSeconds += Time.fixedDeltaTime;
+        // Increase the in-game time counter by fixed delta time multiplied by the current tick speed
         seconds += Time.fixedDeltaTime * tick;
-        if (seconds >= 60)
+        // If the seconds counter reaches 60, reset the seconds counter and increase the minutes counter
+        if (seconds >= 60) 
         {
+            // 
             seconds = 0;
-            minutes++;
+            // 
+            minutes++; 
         }
-        if (minutes >= 60)
+        // If the minutes counter reaches 60, reset the minutes counter and increase the hours counter
+        if (minutes >= 60) 
         {
             minutes = 0;
-            hours++;
+            hours++; 
         }
-        if (hours >= 24)
+        // If the hours counter reaches 24, reset the hours counter and increase the days counter
+        // and increase the days survived counter
+        if (hours >= 24) 
         {
             hours = 0;
             days++;
@@ -107,9 +116,13 @@ public class DayNightCycle : MonoBehaviour
     }
     public void DisplayTime()
     {
+        // Update the time display text with the current hours and minutes in 00:00 format
         timeDisplay.text = (hours.ToString("00:") + minutes.ToString("00")); //+ seconds.ToString("00"));
+        // Update the day display text with the current day number
         dayDisplay.text = "Day: " + days;
 
+        // If the current time is between sunrise and sunset + 2 hours, set the dayTime boolean to TRUE
+        // Otherwise, set dayTime boolean to FALSE
         if (hours > sunRise && hours < sunSet + 2)
         {
             dayTime = true;
@@ -122,176 +135,157 @@ public class DayNightCycle : MonoBehaviour
 
     public void DaysSurvived()
     {
+        // If the number of days is equal to 1 update the days survived display text with singular grammar
+        // Otherwise, update the days survived display text with plural grammar
         if (days == 1)
             daysSurvivedDisplay.text = "SURVIVED " + daysSurvived + " DAY";
         else
             daysSurvivedDisplay.text = "SURVIVED " + daysSurvived + " DAYS";
 
+        // If the current time is one hour after sunrise, reset the real time counter
         if (hours == sunRise + 1 && minutes == 0)
         {
             realSeconds = 0;
         }
 
+        // If the real time counter is less than 5 seconds
         if (realSeconds < 5)
         {
-            daysSurvivedDisplay.color = new Color(daysSurvivedDisplay.color.r, daysSurvivedDisplay.color.g, daysSurvivedDisplay.color.b, ((float)realSeconds) / 5);
+            // Update the days survived display text color with alpha value based on the real time counter value (fading in)
+            daysSurvivedDisplay.color = new Color
+            (daysSurvivedDisplay.color.r, daysSurvivedDisplay.color.g, daysSurvivedDisplay.color.b, ((float)realSeconds) / 5);
         }
 
+        // If the real time counter is between 5 and 10 seconds
         if (realSeconds < 10 && realSeconds > 5)
         {
-            daysSurvivedDisplay.color = new Color(daysSurvivedDisplay.color.r, daysSurvivedDisplay.color.g, daysSurvivedDisplay.color.b, 1 - ((float)realSeconds -5 ) / 5);
+            // Update the days survived display text color with alpha value based on the real time counter value (fading out)
+            daysSurvivedDisplay.color = new Color
+            (daysSurvivedDisplay.color.r, daysSurvivedDisplay.color.g, daysSurvivedDisplay.color.b, 1 - ((float)realSeconds -5 ) / 5);
         }
     }
 
     public void RotateSunMoon()
     {
+        // Calculate the number of seconds per day and seconds per in-game day
         float secondsPerDay = 60 * 60 * 24;
         float secondsPerInGameDay = (Time.fixedDeltaTime * tick) / secondsPerDay;
+
+        // Calculate the rotation angle based on the number of seconds per in-game day and the rotation value
         sunMoonRotation = secondsPerInGameDay * rotation;
-        sunMoon.transform.Rotate(0,0, sunMoonRotation);
+
+        // Rotate the sun/moon object around its z-axis by the calculated rotation angle
+        sunMoon.transform.Rotate(0, 0, sunMoonRotation);
     }
 
     public void ControlSunlightIntesity()
     {
-        //night cycle
-        if (hours >= sunSet && hours < sunSet +1) //dusk begins at public sunSet var and takes 3 hours to complete
+        // IF hours at sunSet, gradually decrease the intensity of the sun over the course of 3 hours. Night time begins
+        if (hours >= sunSet && hours < sunSet + 3)
         {
-            sunlight.intensity = Mathf.Clamp((1 - (float)minutes / 180), 0.1f, 1f); //minutes = 60, slowly raises value. divide by 180 3 times for slow transition. need to add 60 each time.
+            sunlight.intensity = Mathf.Clamp((1 - ((float)minutes + ((hours - sunSet) * 60)) / 180), 0.1f, 1f);
         }
-        if (hours >= sunSet+1 && hours < sunSet+2)
+        // IF hours at sunRise, gradually increase the intensity of the sun over the course of 3 hours. Day time begins
+        else if (hours >= sunRise && hours < sunRise + 3)
         {
-            sunlight.intensity = Mathf.Clamp((1 - ((float)minutes + 60) / 180), 0.1f, 1f);
-        }
-        if (hours >= sunSet+2 && hours < sunSet+3)
-        {
-            sunlight.intensity = Mathf.Clamp((1 - ((float)minutes + 120) / 180), 0.1f, 1f);
-        }
-
-        //morning cycle
-        if (hours >= sunRise && hours < sunRise + 1) //dawn begins at public sunRise var and takes 3 hours to complete
-        {
-            sunlight.intensity = Mathf.Clamp(((float)minutes / 180), 0.1f, 1f);
-        }
-        if (hours >= sunRise + 1 && hours < sunRise + 2)
-        {
-            sunlight.intensity = Mathf.Clamp((((float)minutes + 60) / 180), 0.1f, 1f);
-        }
-        if (hours >= sunRise + 2 && hours < sunRise + 3)
-        {
-            sunlight.intensity = Mathf.Clamp((((float)minutes + 120) / 180), 0.1f, 1f);
+            sunlight.intensity = Mathf.Clamp((((float)minutes + ((hours - sunRise) * 60)) / 180), 0.1f, 1f);
         }
     }
 
     public void ControlStars()
     {
-        //stars appear
-        if (hours >= starsAppear && hours < starsAppear + 1)
+        // IF hours at starsAppear, gradually increase the opacity of the stars over the course of 3 hours
+        if (hours >= starsAppear && hours < starsAppear + 3)
         {
-            stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, (float)minutes / 180);
+            stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, ((float)minutes + ((hours - starsAppear) * 60)) / 180);
         }
-        if (hours >= starsAppear + 1 && hours < starsAppear + 2)
+        // IF hours at starsAppear, gradually decrease the opacity of the stars over the course of 3 hours
+        else if (hours >= starsDisappear || hours < starsDisappear + 3)
         {
-            stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, ((float)minutes + 60) / 180);
+            stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, 1 - ((float)minutes + ((hours - starsDisappear) * 60)) / 180);
         }
-        if (hours >= starsAppear + 2 && hours < starsAppear + 3)
+    }
+}
+
+// Code below was previously used to control daylight and starlight intensities but had flaws
+
+//public Volume postExposVolume; postExposVolume = gameObject.GetComponent<Volume>();
+//public SpriteRenderer[] stars;
+
+/*public void ControlPPV()
+{
+    if (hours >= sunSet && hours < sunSet + 1)
+    {
+        postExposVolume.weight = (float)minutes / 180; 
+    }
+    if (hours >= sunSet + 1 && hours < sunSet + 2)
+    {
+        postExposVolume.weight = ((float)minutes + 60) / 180;
+    }
+    if (hours >= sunSet + 2 && hours < sunSet + 3)
+    {
+        postExposVolume.weight = ((float)minutes + 120) / 180;
+    }
+
+    if (hours >= sunRise && hours < sunRise + 1)
+    {
+        postExposVolume.weight = 1 - (float)minutes / 180;
+    }
+    if (hours >= sunRise + 1 && hours < sunRise + 2)
+    {
+        postExposVolume.weight = 1 - ((float)minutes + 60) / 180;
+    }
+    if (hours >= sunRise + 2 && hours < sunRise + 3)
+    {
+        postExposVolume.weight = 1 - ((float)minutes + 120) / 180;
+    }
+}*/
+
+/*public void ControlStarAlpha()
+{
+    //stars appear
+    if (hours >= starsAppear && hours < starsAppear + 1)
+    {
+        for (int i = 0; i < stars.Length; i++)
         {
-            stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, ((float)minutes + 120) / 180);
+            stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, (float)minutes / 180);
         }
-        //stars disapear
-        if (hours >= starsDisappear && hours < starsDisappear + 1)
+    }
+    if (hours >= starsAppear + 1 && hours < starsAppear + 2)
+    {
+        for (int i = 0; i < stars.Length; i++)
         {
-            stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, 1 - (float)minutes / 180);
+            stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, ((float)minutes + 60) / 180);
         }
-        if (hours >= starsDisappear + 1 && hours < starsDisappear + 2)
+    }
+    if (hours >= starsAppear + 2 && hours < starsAppear + 3)
+    {
+        for (int i = 0; i < stars.Length; i++)
         {
-            stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, 1 - ((float)minutes + 60) / 180);
-        }
-        if (hours >= starsDisappear + 2 && hours < starsDisappear + 3)
-        {
-            stars.color = new Color(stars.color.r, stars.color.g, stars.color.b, 1 - ((float)minutes + 120) / 180);
+            stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, ((float)minutes + 120) / 180);
         }
     }
 
-    //public Volume postExposVolume; postExposVolume = gameObject.GetComponent<Volume>();
-    //public SpriteRenderer[] stars;
-
-    /*public void ControlPPV()
+    //stars disapear
+    if (hours >= starsDisappear && hours < starsDisappear + 1)
     {
-        //night cycle
-        if (hours >= sunSet && hours < sunSet + 1) //dusk begins at public sunSet var and takes 3 hours to complete
+        for (int i = 0; i < stars.Length; i++)
         {
-            postExposVolume.weight = (float)minutes / 180; //minutes = 60, slowly raises value. divide by 180 3 times for slow transition. need to add 60 each time.
+            stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, 1 - (float)minutes / 180);
         }
-        if (hours >= sunSet + 1 && hours < sunSet + 2)
-        {
-            postExposVolume.weight = ((float)minutes + 60) / 180;
-        }
-        if (hours >= sunSet + 2 && hours < sunSet + 3)
-        {
-            postExposVolume.weight = ((float)minutes + 120) / 180;
-        }
-
-        //morning cycle
-        if (hours >= sunRise && hours < sunRise + 1) //dawn begins at public sunRise var and takes 3 hours to complete
-        {
-            postExposVolume.weight = 1 - (float)minutes / 180;
-        }
-        if (hours >= sunRise + 1 && hours < sunRise + 2)
-        {
-            postExposVolume.weight = 1 - ((float)minutes + 60) / 180;
-        }
-        if (hours >= sunRise + 2 && hours < sunRise + 3)
-        {
-            postExposVolume.weight = 1 - ((float)minutes + 120) / 180;
-        }
-    }*/
-
-    /*public void ControlStarAlpha()
+    }
+    if (hours >= starsDisappear + 1 && hours < starsDisappear + 2)
     {
-        //stars appear
-        if (hours >= starsAppear && hours < starsAppear + 1)
+        for (int i = 0; i < stars.Length; i++)
         {
-            for (int i = 0; i < stars.Length; i++)
-            {
-                stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, (float)minutes / 180);
-            }
+            stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, 1 - ((float)minutes + 60) / 180);
         }
-        if (hours >= starsAppear + 1 && hours < starsAppear + 2)
+    }
+    if (hours >= starsDisappear + 2 && hours < starsDisappear + 3)
+    {
+        for (int i = 0; i < stars.Length; i++)
         {
-            for (int i = 0; i < stars.Length; i++)
-            {
-                stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, ((float)minutes + 60) / 180);
-            }
+            stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, 1 - ((float)minutes + 120) / 180);
         }
-        if (hours >= starsAppear + 2 && hours < starsAppear + 3)
-        {
-            for (int i = 0; i < stars.Length; i++)
-            {
-                stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, ((float)minutes + 120) / 180);
-            }
-        }
-
-        //stars disapear
-        if (hours >= starsDisappear && hours < starsDisappear + 1)
-        {
-            for (int i = 0; i < stars.Length; i++)
-            {
-                stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, 1 - (float)minutes / 180);
-            }
-        }
-        if (hours >= starsDisappear + 1 && hours < starsDisappear + 2)
-        {
-            for (int i = 0; i < stars.Length; i++)
-            {
-                stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, 1 - ((float)minutes + 60) / 180);
-            }
-        }
-        if (hours >= starsDisappear + 2 && hours < starsDisappear + 3)
-        {
-            for (int i = 0; i < stars.Length; i++)
-            {
-                stars[i].color = new Color(stars[i].color.r, stars[i].color.g, stars[i].color.b, 1 - ((float)minutes + 120) / 180);
-            }
-        }
-    }*/
-}
+    }
+}*/

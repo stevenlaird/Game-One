@@ -101,7 +101,7 @@ public class PlayerController : MonoBehaviour
 
     ///////////////////
 
-    // Place the Player at the spawn position and initialize necessary component references
+    // Places the Player at the spawn position and initializes the rigidbody and animator
     public void PlaceAtSpawn()
     {
         this.gameObject.transform.position = spawnPosition;
@@ -743,7 +743,7 @@ public class PlayerController : MonoBehaviour
         // Logs the amount of damage taken after reduction from armor.
         Debug.Log("Hit for " + reducedDamage);
 
-        // Subtracts the reduced damage from the player's current health.
+        // Subtracts the reduced damage from the Player's current health.
         currentHealth -= reducedDamage;
 
         // Calculates the knockback direction based on the hitFromPosition parameter.
@@ -757,8 +757,8 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(knockbackX * 10, ForceMode2D.Impulse);
             //rb.AddForce(knockbackDirection * 20, ForceMode2D.Impulse);
 
-        // IF the player's current health is less than or equal to 0, the player is dead.
-        // Triggers the "Is Dead" animation, disables the player's capsule collider, and drops all items in the inventory.
+        // IF the Player's current health is less than or equal to 0, the player is dead.
+        // Triggers the "Is Dead" animation, disables the Player's capsule collider, and drops all items in the inventory.
         if (currentHealth <= 0)
         {
             animator.SetTrigger("Is Dead");
@@ -786,7 +786,7 @@ public class PlayerController : MonoBehaviour
 
     // Update the destroy counter and destroy the player's game object if the Player's health reaches zero
     // Respawn and reset the Player's health, rigidbody, collider, and days survived
-    // Drop all of the Player's items on the ground when he dies
+    // Drop all of the Player's items on the ground when they die
     public void DestroyCounter()
     {
         if (isDead == true)
