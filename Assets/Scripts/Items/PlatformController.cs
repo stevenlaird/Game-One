@@ -35,11 +35,11 @@ public class PlatformController : MonoBehaviour
         platformEffector2D.surfaceArc = 90f;
         
         // Set the initial value of waitTime and playerMovingDown
-        waitTime = 0.1f;
+        waitTime = 0.3f;
         playerMovingDown = false;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // Get the player's input for debugging purposes
         playerVerticalInput = player.vertical;
@@ -60,7 +60,7 @@ public class PlatformController : MonoBehaviour
             // Set playerMovingDown to FALSE
             playerMovingDown = false;
             // Reset the wait time counter so the player can fall through the platform again
-            waitTime = 0.1f;
+            waitTime = 0.3f;
         }
 
         // IF the player is trying to move down
