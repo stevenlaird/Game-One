@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7093c5c870600d46a172c4842cd0675, type: 3}
+  m_Name: Torch
+  m_EditorClassIdentifier: 
+  requiredItems:
+  - item: {fileID: 11400000, guid: f5d4bfb18efebff439141d0df7e8d5a5, type: 2}
+    quantity: 1
+    startingDurability: 0
+    currentDurability: 999
+  - item: {fileID: 11400000, guid: 347a7701f66666e4c9f32ca2b4552cbc, type: 2}
+    quantity: 1
+    startingDurability: 0
+    currentDurability: 999
+  craftedItem:
+    item: {fileID: 11400000, guid: 65ec8347def10cc44b20cad1d0df97f9, type: 2}
+    quantity: 4
+    startingDurability: 0
+    currentDurability: 999
+  requireCraftingTable: 0
+  requireAnvil: 0
+  requireOven: 0

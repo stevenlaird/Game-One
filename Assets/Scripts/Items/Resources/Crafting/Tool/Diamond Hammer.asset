@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7093c5c870600d46a172c4842cd0675, type: 3}
+  m_Name: Diamond Hammer
+  m_EditorClassIdentifier: 
+  requiredItems:
+  - item: {fileID: 11400000, guid: 66e6ff9694fa5c546820f7ee8ed18316, type: 2}
+    quantity: 3
+    startingDurability: 0
+    currentDurability: 0
+  - item: {fileID: 11400000, guid: f5d4bfb18efebff439141d0df7e8d5a5, type: 2}
+    quantity: 1
+    startingDurability: 0
+    currentDurability: 0
+  craftedItem:
+    item: {fileID: 11400000, guid: 75688eb5b722bdc48a48511953c8e45b, type: 2}
+    quantity: 1
+    startingDurability: 250
+    currentDurability: 250
+  requireCraftingTable: 0
+  requireAnvil: 1
+  requireOven: 0
